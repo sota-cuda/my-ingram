@@ -1,0 +1,221 @@
+"""全局配置项"""
+
+import os
+from collections import namedtuple
+
+from .utils import net
+
+
+_config = {
+    "users": [
+        "admin",
+    ],
+    "passwords": [
+        "admin",
+        "admin123",
+        "admin@123",
+        "Admin@123",
+        "888888",
+        "666666",
+        "12345",
+        "123456",
+        "Admin123",
+        "abc12345",
+        "admin1234",
+        "admin12345",
+        "admin123456",
+        "Admin1234",
+        "Admin12345",
+        "Admin123456",
+        "Qwerty123",
+        "hvi12345",
+        "user12345",
+        "hik543211",
+        "P@ssw0rd",
+        "11111111",
+        "12345qwert",
+        "Abc12345",
+        "hd5432111",
+        "1234asdf",
+        "1234qwer",
+        "abc@12345",
+        "Password@",
+        "Password1",
+        "Aa123456",
+        "abcd123",
+        "ADMIN123",
+        "1q2w3e4r",
+        "hik12345",
+        "hik12345@",
+        "asd12345",
+        "Admin321",
+        "12345abc",
+        "admin@12345",
+        "ADMIN@123",
+        "123admin",
+        "",
+        "qwerty@123",
+        "qwerty123",
+        "ADMIN@123",
+        "ADMIN123",
+        "@dmin123",
+        "hd543211",
+        "abcd1234",
+        "12345678",
+        "asdf1234",
+        "123abc456",
+        "Abcd1234",
+        "a12345678",
+        "1234567a",
+        "12345678a",
+        "123456789a",
+        "a1234567",
+        "a123456789",
+        "1234abcd",
+        "Passw0rd",
+        "Admin123@",
+        "admin123@",
+        "Admin@1234",
+        "qwerty@123",
+        "1q2w3e4r",
+        "abc123",
+        "abc1234",
+        "abc12345",
+        "admin@1234",
+        "Admin123!",
+        "qwer1234",
+        "hik123",
+        "hik1234",
+        "hik12345",
+        "hik@123",
+        "hik@1234",
+        "hik@12345",
+        "ABCD1234",
+        "hd5432123",
+        "abcd123456",
+        "Hik12345",
+        "Qwerty12",
+        "an123456",
+        "P@ssword579",
+        "12345678k",
+        "pas123123c",
+        "Password",
+        "pass123321!",
+        "aaaa1111",
+        "Hd543211",
+        "abcd1234",
+        "abcd12345",
+        "1q2w3e4r5t",
+        "qwerty123",
+        "hik123456",
+        "admiN123",
+        "abcd123444",
+        "abcd7891",
+        "Abc123456",
+        "123456789A",
+        "hd12345678",
+        "q@123456",
+        "Pass#123321",
+        "12345qwe",
+        "123454321q",
+        "12345678q",
+        "1234admin",
+        "12345admin",
+        "password",
+        "qwerty@1234",
+        "qwerty@12345",
+        "qwerty@123456",
+        "admin123321",
+        "admin@123321",
+        "qwerty1234",
+        "qwerty12345",
+        "qwerty123456",
+        "a@123456",
+        "ADMIN@1234",
+        "ADMIN@12345",
+        "ADMIN@123456",
+        "ADMIN1234",
+        "ADMIN12345",
+        "ADMIN123456",
+        "",
+    ],
+    "ports": [
+        37777,
+        37778,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        90,
+        # Common camera web UI
+        8000,
+        8001,
+        8002,
+        8080,
+        8081,
+        8082,
+        8083,
+        8084,
+        8085,
+        8086,
+        8088,
+        8090,
+        8181,
+        # HTTPS
+        443,
+        8443,
+        # RTSP
+        554,
+        555,
+        8554,
+        8555,
+        # Other common camera ports
+        2051,
+        8888,
+        9000,
+        9080,
+        # Device-specific
+        3500,  # Lorex DP Service
+        7001,
+        34567,
+        49152,
+        55555,
+    ],
+    "user_agent": net.get_user_agent(),  # to save time, we only get user agent once.
+    # rules
+    "product": {},
+    "rules": set(),
+    # file & dir
+    "log": "log.txt",
+    "not_vulnerable": "not_vulnerable.csv",
+    "vulnerable": "results.csv",
+    "snapshots": "snapshots",
+    # wechat
+    "wxuid": "",
+    "wxtoken": "",
+}
+
+
+def get_config(args=None):
+    # 指纹规则
+    Rule = namedtuple("Rule", ["product", "path", "val"])
+    with open(os.path.join(os.path.dirname(__file__), "rules.csv"), "r") as f:
+        for line in [l.strip() for l in f if l.strip()]:
+            product, path, val = line.split(",")
+            _config["rules"].add(Rule(product, path, val))
+            _config["product"][product] = product
+
+    # 组装命令行获取的参数值
+    if args:
+        for arg in (args := vars(args)):
+            # 此处不要直接 if args[arg]，因为这样会导致空字符串也为 False
+            if args[arg] is not None:
+                _config[arg] = args[arg]
+
+    Config = namedtuple("config", _config.keys())
+    return Config(**_config)
